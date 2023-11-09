@@ -3,9 +3,33 @@ import Link from 'next/link';
 
 import { getNavLinks } from '@/helpers/web-base-helpers';
 
-async function SiteFooter() {
-  const navLinks = await getNavLinks();
+async function CMSLinks({links}) {
+  if (links.status === 'pending') {
+    throw navLinks;
+  }
 
+  const fullfilledNavLinks = await links;
+
+  // Only show the first 4 links in the header.
+  const fourLinks = fullfilledNavLinks.slice(0, 4);
+  return (
+      <nav>
+        <ol>
+          {fullfilledNavLinks.map(
+              ({ slug, label, href }) => (
+                  <li key={slug}>
+                    <Link href={href}>
+                      {label}
+                    </Link>
+                  </li>
+              )
+          )}
+        </ol>
+      </nav>
+  )
+}
+
+async function SiteFooter({navLinks}) {
   return (
     <header className="site-footer">
       <div className="logo-wrapper">
@@ -21,19 +45,9 @@ async function SiteFooter() {
       <div className="link-wrapper">
         <div className="col">
           <h2>Navigation</h2>
-          <nav>
-            <ol>
-              {navLinks.map(
-                ({ slug, label, href }) => (
-                  <li key={slug}>
-                    <Link href={href}>
-                      {label}
-                    </Link>
-                  </li>
-                )
-              )}
-            </ol>
-          </nav>
+          <React.Suspense>
+            <CMSLinks links={navLinks}/>
+          </React.Suspense>
         </div>
         <div className="col">
           <h2>Legal</h2>
